@@ -72,3 +72,45 @@ while True:
     
 video.release()
 cv2.destroyAllWindows()
+
+from sklearn.model_selection import train_test_split
+
+with open('data/names.pkl', 'rb') as f:
+    LABELS = pickle.load(f)
+with open('data/face_data.pkl', 'rb') as f:
+    FACES = pickle.load(f)
+
+X_train, X_test, y_train, y_test = train_test_split(FACES, LABELS, test_size=0.2, random_state=42)
+
+from sklearn.neighbors import KNeighborsClassifier
+
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train, y_train)
+
+
+y_pred = knn.predict(X_test)
+
+from sklearn.metrics import accuracy_score
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
+
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+conf_matrix = confusion_matrix(y_test, y_pred)
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues")
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+
+from sklearn.model_selection import cross_val_score
+
+cv_scores = cross_val_score(knn, FACES, LABELS, cv=5)
+print(f"Cross-Validation Accuracy: {cv_scores.mean() * 100:.2f}%")
+
+
+
